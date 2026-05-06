@@ -309,6 +309,9 @@ function restart() {
     nameInput.addEventListener('input', () => {
       startBtn.disabled = nameInput.value.trim().length < 2;
     });
+    nameInput.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' && !startBtn.disabled) startQuiz();
+    });
     startBtn.addEventListener('click', startQuiz);
   }
   const wrap = document.getElementById('bgWrap');
