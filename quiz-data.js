@@ -112,13 +112,13 @@ const Q = [
     exp:"Correct. Korean meals are communal by design. Banchan is shared. Just avoid double-dipping, and don't use your personal chopsticks to serve directly onto someone else's plate."
   },
 
-  // Q13 — Uri 문화 (마지막)
+  // Q13 — 단체 문화 (마지막)
   {
     cat:"Korean Culture",
     vis:{type:"image", src:"images/q13.png", alt:"Group activity representing Korean community harmony"},
-    text:"Following the group schedule during a Korean program is more than just following rules — it's a sign of respect for Korean community culture.",
+    text:"In Korean group activities, following the schedule and instructions goes beyond just obeying rules — it is a sign of respect for Korea's collective culture.",
     ans:true,
-    exp:"Exactly. In many Western cultures, individual choice is the highest value. In Korea, there's a concept called 'Uri' — meaning 'we' or 'us' — where harmony within the group is deeply valued. When you follow the flow, show up on time, and stay in sync with the group, Koreans don't just see good manners. They see someone who genuinely understands and respects their culture. That's how you earn 'Jeong' — a kind of warmth and bond that Koreans reserve for people they truly welcome."
+    exp:"Correct. In Korea, collective harmony is a deeply rooted cultural value. When you follow the group schedule and listen to your leaders, Koreans see it not as blind compliance — but as genuine respect for the people around you. As you join us for this program, we ask the same: trust the schedule, follow your team leaders, and move together as a group. That's how we make this experience great for everyone."
   }
 
 ];
