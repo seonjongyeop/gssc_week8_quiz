@@ -135,7 +135,7 @@ function sendToSheet(payload) {
   fetch(SHEET_URL, {
     method:'POST',
     mode:'no-cors',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'text/plain'},
     body:JSON.stringify(payload)
   }).catch(err => console.warn('Sheet sync failed:', err));
 }
