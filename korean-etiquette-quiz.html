@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GSSC 2026 — Week 8: Korean Etiquette</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --card: #111111;
+    --card2: #161616;
+    --blue: #242EC1;
+    --blue-light: #3d49e8;
+    --blue-dim: rgba(36,46,193,0.15);
+    --text: #ffffff;
+    --muted: rgba(255,255,255,0.45);
+    --border: rgba(255,255,255,0.08);
+    --border-blue: rgba(36,46,193,0.5);
+    --correct: #2ecc7a;
+    --wrong: #ff4d4d;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 20px;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED BG ── */
+  .bg-wrap {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+  }
+  /* Diagonal streaks */
+  .streak {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(36,46,193,0.35), transparent);
+    animation: streakMove linear infinite;
+    transform: rotate(-20deg);
+    transform-origin: left center;
+  }
+  @keyframes streakMove {
+    from { left: -60%; opacity: 0; }
+    5%   { opacity: 1; }
+    95%  { opacity: 1; }
+    to   { left: 130%; opacity: 0; }
+  }
+  /* Glowing orbs */
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); pointer-events: none;
+    animation: orbDrift ease-in-out infinite;
+  }
+  @keyframes orbDrift {
+    0%,100% { transform: translate(0,0) scale(1); }
+    40%     { transform: translate(25px,-18px) scale(1.08); }
+    70%     { transform: translate(-15px,12px) scale(0.95); }
+  }
+  /* Grid pattern */
+  .bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(36,46,193,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(36,46,193,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPulse 6s ease-in-out infinite;
+  }
+  @keyframes gridPulse {
+    0%,100% { opacity: 0.6; }
+    50%     { opacity: 1; }
+  }
+
+  .container { width: 100%; max-width: 680px; position: relative; z-index: 1; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.5s ease both; }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ══ INTRO ══ */
+  .intro-inner { text-align: center; }
+
+  .event-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border-blue);
+    background: var(--blue-dim);
+    padding: 6px 16px; margin-bottom: 40px;
+    font-size: 11px; letter-spacing: 2.5px; font-weight: 600;
+    color: rgba(255,255,255,0.6); text-transform: uppercase;
+  }
+  .event-pill .pulse-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue-light);
+    animation: pulseDot 2s ease-in-out infinite;
+  }
+  @keyframes pulseDot {
+    0%,100% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(61,73,232,.6); }
+    50%     { opacity:.6; transform:scale(1.3); box-shadow:0 0 0 6px rgba(61,73,232,0); }
+  }
+
+  /* LOGO */
+  .logo-wrap {
+    margin-bottom: 28px;
+    animation: logoFloat 5s ease-in-out infinite;
+  }
+  .logo-wrap img {
+    width: min(280px, 65vw);
+    display: block;
+    margin: 0 auto;
+    background: transparent;
+  }
+  @keyframes logoFloat {
+    0%,100% { transform: translateY(0px); }
+    50%     { transform: translateY(-7px); }
+  }
+
+  /* YEAR BAND */
+  @keyframes bandGlow {
+    0%,100% { filter: drop-shadow(0 4px 20px rgba(36,46,193,0.5)); }
+    50%     { filter: drop-shadow(0 4px 36px rgba(61,73,232,0.85)); }
+  }
+
+  /* QUIZ TITLE */
+  .quiz-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(22px, 5vw, 34px);
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #ffffff 0%, #7b8fff 50%, #242EC1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 16px rgba(100,120,255,0.5));
+    margin-bottom: 6px;
+  }
+  .quiz-subtitle {
+    font-size: 12px; letter-spacing: 1.5px; color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  /* NAME FORM */
+  .name-form { max-width: 340px; margin: 0 auto; }
+  .name-form label {
+    display: block; font-size: 10px; letter-spacing: 3px;
+    font-weight: 700; color: var(--muted);
+    margin-bottom: 8px; text-transform: uppercase;
+  }
+  .name-form input {
+    width: 100%; background: var(--card);
+    border: none; border-bottom: 2px solid var(--blue);
+    color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; padding: 13px 16px;
+    outline: none; margin-bottom: 16px;
+    transition: border-color .2s;
+  }
+  .name-form input:focus { border-bottom-color: var(--blue-light); }
+  .name-form input::placeholder { color: var(--muted); }
+
+  .start-btn {
+    width: 100%; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    color: #fff; border: none;
+    padding: 17px; font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing: 5px; cursor: pointer;
+    transition: all .25s;
+    box-shadow: 0 4px 24px rgba(36,46,193,0.45);
+  }
+  .start-btn::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+    animation: btnShimmer 2.5s ease-in-out infinite;
+  }
+  @keyframes btnShimmer {
+    from { left: -100%; }
+    to   { left: 200%; }
+  }
+  .start-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 36px rgba(36,46,193,0.65);
+  }
+  .start-btn:disabled { opacity: .28; cursor: not-allowed; transform: none; }
+  .name-hint { font-size: 11px; color: var(--muted); margin-top: 10px; letter-spacing: .3px; }
+
+  /* ══ QUIZ ══ */
+  .progress-bar {
+    height: 2px; background: var(--border);
+    margin-bottom: 28px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; position: relative; overflow: hidden;
+    background: linear-gradient(90deg, var(--blue), var(--blue-light));
+    transition: width .6s ease;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute; top:0; left:0; right:0; bottom:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+  @keyframes shimmer { from{transform:translateX(-100%)} to{transform:translateX(200%)} }
+
+  .q-meta {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 14px;
+  }
+  .q-counter {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px; letter-spacing: 2px; color: var(--muted);
+  }
+  .q-counter span { color: #fff; }
+  .q-category {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--blue-light);
+    background: var(--blue-dim);
+    padding: 4px 12px; border-radius: 20px;
+    border: 1px solid var(--border-blue);
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--blue);
+    margin-bottom: 12px; overflow: hidden;
+    box-shadow: 0 2px 20px rgba(0,0,0,.5);
+  }
+
+  .q-image-wrap {
+    width: 100%; aspect-ratio: 16/7;
+    overflow: hidden; background: #000;
+  }
+  .q-image-wrap img {
+    width: 100%; height: 100%;
+    object-fit: contain; display: block;
+  }
+  .q-placeholder {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 12px;
+    background: repeating-linear-gradient(
+      -20deg, #0d0d0d, #0d0d0d 12px, #111 12px, #111 24px
+    );
+    color: var(--muted);
+  }
+  .q-placeholder .ph-emoji { font-size: 52px; }
+  .q-placeholder .ph-label {
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; text-align: center; padding: 0 16px;
+  }
+  .q-emoji-only {
+    font-size: 56px; text-align: center;
+    padding: 28px 0 18px; display: block;
+  }
+
+  .q-body { padding: 22px 24px 26px; }
+  .question-text {
+    font-size: clamp(15px, 2.6vw, 18px);
+    font-weight: 500; line-height: 1.65; color: #fff;
+  }
+
+  /* CHOICES */
+  .choices {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 12px;
+  }
+  .choice-btn {
+    background: var(--card); border: 1px solid var(--border);
+    color: #fff; padding: 18px 12px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all .18s;
+  }
+  .choice-btn .ci { display: block; font-size: 28px; margin-bottom: 5px; }
+  .choice-btn .cl {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 2px; display: block;
+  }
+  .choice-btn .cs { font-size: 11px; color: var(--muted); }
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--blue-light);
+    background: var(--blue-dim);
+    transform: translateY(-1px);
+  }
+  .choice-btn.correct { border-color:var(--correct); background:rgba(46,204,122,.08); }
+  .choice-btn.correct .cl, .choice-btn.correct .cs { color:var(--correct); }
+  .choice-btn.wrong   { border-color:var(--wrong);   background:rgba(255,77,77,.08); }
+  .choice-btn.wrong   .cl, .choice-btn.wrong   .cs   { color:var(--wrong); }
+  .choice-btn:disabled { cursor: default; transform: none; }
+
+  /* FEEDBACK */
+  .feedback {
+    border: 1px solid var(--border);
+    padding: 18px 22px; display: none;
+    margin-bottom: 12px;
+    animation: fadeUp .3s ease both;
+  }
+  .feedback.correct-fb {
+    border-color: var(--correct);
+    background: rgba(46,204,122,.06);
+  }
+  .feedback.wrong-fb {
+    border-color: var(--wrong);
+    background: rgba(255,77,77,.06);
+  }
+  .fb-head {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px; letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .correct-fb .fb-head { color: var(--correct); }
+  .wrong-fb   .fb-head { color: var(--wrong); }
+  .fb-body { font-size: 13.5px; line-height: 1.75; color: rgba(255,255,255,0.55); }
+  .fb-img {
+    width: 100%; max-height: 220px; object-fit: contain;
+    margin-top: 14px; background: #000; border-radius: 2px;
+  }
+
+  .next-btn {
+    display: none; width: 100%;
+    background: transparent;
+    border: 1px solid var(--blue);
+    color: var(--blue-light);
+    padding: 14px; font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 3px; cursor: pointer;
+    transition: all .2s;
+  }
+  .next-btn:hover { background: var(--blue); color: #fff; }
+
+  /* ══ RESULT ══ */
+  .result-inner { text-align: center; padding-top: 8px; }
+  .saving-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--muted); margin-bottom: 24px;
+  }
+  .saving-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--muted); animation: blink 1.2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+  .saving-badge.done .saving-dot { background: var(--correct); animation: none; }
+  .saving-badge.done { color: var(--correct); }
+  .saving-badge.fail .saving-dot { background: var(--wrong); animation: none; }
+
+  .score-ring { width: 160px; height: 160px; margin: 0 auto 28px; position: relative; }
+  .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .score-ring circle { fill: none; stroke-width: 8; }
+  .bg-c { stroke: rgba(255,255,255,.07); }
+  .pg-c {
+    stroke: url(#ringGrad); stroke-linecap: round;
+    transition: stroke-dashoffset 1.4s ease;
+    filter: drop-shadow(0 0 8px rgba(36,46,193,.8));
+  }
+  .score-text {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .score-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; line-height: 1; color: #fff;
+  }
+  .score-den { font-size: 13px; color: var(--muted); }
+
+  .result-name {
+    font-size: 11px; letter-spacing: 3px;
+    color: var(--blue-light); margin-bottom: 6px;
+    text-transform: uppercase; font-weight: 700;
+  }
+  .result-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(34px,7vw,58px);
+    letter-spacing: 2px; line-height: 1; margin-bottom: 12px;
+  }
+  .result-msg {
+    color: var(--muted); font-size: 14px; line-height: 1.75;
+    max-width: 420px; margin: 0 auto 28px;
+  }
+  .result-msg strong { color: #fff; }
+
+  .btn-outline {
+    background: transparent; border: 1px solid rgba(255,255,255,.15);
+    color: var(--muted); padding: 12px 32px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 16px;
+    letter-spacing: 2px; cursor: pointer; transition: all .2s;
+  }
+  .btn-outline:hover { border-color: #fff; color: #fff; }
+
+  .result-logo {
+    margin-top: 36px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .result-logo img { width: 160px; opacity: .5; margin: 0 auto; display: block; }
+  .result-sub {
+    font-size: 10px; letter-spacing: 2px; color: var(--muted);
+    text-transform: uppercase; margin-top: 10px;
+  }
+
+  #screen-quiz {
+    background: linear-gradient(160deg, #e3e5f3 0%, #ffffff 100%);
+    border-radius: 4px;
+    padding: 28px 24px;
+    color: #0d0f2a;
+  }
+  #screen-quiz .q-counter { color: rgba(0,0,0,0.4); }
+  #screen-quiz .q-counter span { color: #0d0f2a; }
+  #screen-quiz .q-category {
+    color: var(--blue);
+    background: rgba(36,46,193,0.1);
+    border-color: rgba(36,46,193,0.25);
+  }
+  #screen-quiz .question-card {
+    background: #ffffff;
+    border-color: rgba(0,0,0,0.08);
+    border-top-color: var(--blue);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  #screen-quiz .question-text { color: #0d0f2a; }
+  #screen-quiz .choice-btn {
+    background: #ffffff;
+    border-color: rgba(0,0,0,0.1);
+    color: #0d0f2a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  #screen-quiz .choice-btn .cs { color: rgba(0,0,0,0.4); }
+  #screen-quiz .choice-btn:hover:not(:disabled) {
+    border-color: var(--blue);
+    background: rgba(36,46,193,0.06);
+  }
+  #screen-quiz .choice-btn.correct { background: rgba(46,204,122,.1); border-color: var(--correct); }
+  #screen-quiz .choice-btn.wrong   { background: rgba(255,77,77,.1);  border-color: var(--wrong); }
+  #screen-quiz .feedback {
+    background: #f8f9ff;
+    border-color: rgba(0,0,0,0.1);
+  }
+  #screen-quiz .feedback.correct-fb { background: rgba(46,204,122,.08); border-color: var(--correct); }
+  #screen-quiz .feedback.wrong-fb   { background: rgba(255,77,77,.08);  border-color: var(--wrong); }
+  #screen-quiz .fb-body { color: rgba(0,0,0,0.55); }
+  #screen-quiz .next-btn { border-color: var(--blue); color: var(--blue); }
+  #screen-quiz .next-btn:hover { background: var(--blue); color: #fff; }
+  #screen-quiz .q-placeholder {
+    background: repeating-linear-gradient(-20deg,#eef0f8,#eef0f8 12px,#e3e5f3 12px,#e3e5f3 24px);
+    color: rgba(0,0,0,0.3);
+  }
+
+  .shake { animation: shake .4s ease; }
+  @keyframes shake {
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)}
+    40%{transform:translateX(7px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+  }
+</style>
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-wrap" id="bgWrap">
+  <div class="bg-grid"></div>
+</div>
+
+<div class="container">
+
+  <!-- ══ INTRO ══ -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-inner">
+      <div class="event-pill">
+        <span class="pulse-dot"></span>
+        WEEK 8 · MAY 9TH · VIRTUAL WORKSHOP
+      </div>
+
+      <div class="logo-wrap">
+        <img src="images/logo.png" alt="GSSC 2026">
+      </div>
+
+      <div class="quiz-title">WEEK 8: KOREAN ETIQUETTE</div>
+      <div class="quiz-subtitle">Virtual Workshop · Complete before Week 8 session</div>
+
+      <div class="name-form">
+        <label for="nameInput">Your Name</label>
+        <input id="nameInput" type="text" placeholder="e.g. John Smith" autocomplete="off">
+        <button class="start-btn" id="startBtn" disabled>
+          START THE TEST
+        </button>
+        <p class="name-hint">Your result will be recorded for the session organiser.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ QUIZ ══ -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="q-meta">
+      <div class="q-counter">Q <span id="qNum">1</span> / <span id="qTotal">17</span></div>
+      <div class="q-category" id="qCat">—</div>
+    </div>
+    <div class="question-card" id="questionCard">
+      <div id="qVisual"></div>
+      <div class="q-body"><div class="question-text" id="qText"></div></div>
+    </div>
+    <div class="choices">
+      <button class="choice-btn" id="btnTrue" onclick="answer(true)">
+        <span class="ci">⭕</span>
+        <span class="cl">TRUE</span>
+        <span class="cs">This is correct</span>
+      </button>
+      <button class="choice-btn" id="btnFalse" onclick="answer(false)">
+        <span class="ci">❌</span>
+        <span class="cl">FALSE</span>
+        <span class="cs">This is wrong</span>
+      </button>
+    </div>
+    <div class="feedback" id="feedback">
+      <div class="fb-head" id="fbHead"></div>
+      <div class="fb-body" id="fbBody"></div>
+      <div id="fbImgWrap"></div>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="nextQ()">NEXT →</button>
+  </div>
+
+  <!-- ══ RESULT ══ -->
+  <div class="screen" id="screen-result">
+    <div class="result-inner">
+      <div class="saving-badge" id="savingBadge">
+        <div class="saving-dot"></div>
+        <span id="savingText">Saving your result…</span>
+      </div>
+      <div class="score-ring">
+        <svg viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#242EC1"/>
+              <stop offset="100%" style="stop-color:#6070ff"/>
+            </linearGradient>
+          </defs>
+          <circle class="bg-c" cx="50" cy="50" r="42"/>
+          <circle class="pg-c" id="pgCircle" cx="50" cy="50" r="42"
+            stroke-dasharray="264" stroke-dashoffset="264"/>
+        </svg>
+        <div class="score-text">
+          <div class="score-num" id="scoreNum">—</div>
+          <div class="score-den" id="scoreDen"></div>
+        </div>
+      </div>
+      <div class="result-name" id="resultName"></div>
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-msg" id="resultMsg"></div>
+      <button class="btn-outline" id="retryBtn" onclick="restart()">TRY AGAIN</button>
+      <div class="result-logo">
+        <img src="images/logo.png" alt="GSSC">
+        <div class="result-sub">GSSC 2026 · Week 8 · Virtual Workshop</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+<script src="quiz-data.js"></script>
+</body>
+</html>
