@@ -123,20 +123,61 @@ const Q = [
 
 ];
 
-let cur=0, score=0, userName="", startTime, answers=[];
+let cur=0, score=0, userName="", startTime, answers=[], attemptId="";
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
+function sendToSheet(payload) {
+  if(!SHEET_URL || SHEET_URL==="YOUR_APPS_SCRIPT_URL_HERE") return;
+  fetch(SHEET_URL, {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  }).catch(err => console.warn('Sheet sync failed:', err));
+}
+
+function buildPayload(status) {
+  const total = Q.length;
+  const pct = total ? Math.round(score/total*100) : 0;
+  const elapsed = Math.round((new Date()-startTime)/1000);
+  const wrongCats = [...new Set(answers.filter(a=>!a.ok).map(a=>a.cat))];
+
+  // per-question: pad unanswered with '-'
+  const perQ = Q.map((_,i) => {
+    const a = answers.find(a=>a.q===i+1);
+    return a ? (a.ok?1:0) : '-';
+  }).join(',');
+
+  return {
+    attempt_id: attemptId,
+    timestamp:  new Date().toISOString(),
+    name:       userName,
+    status,                          // started / in_progress / completed
+    answered:   answers.length,
+    total,
+    score,
+    pct,
+    elapsed_sec: elapsed,
+    wrong_categories: wrongCats.join(', '),
+    per_question: perQ               // e.g. "1,0,1,-,-,-,-,-,-,-,-,-,-"
+  };
+}
+
 function startQuiz() {
   userName = document.getElementById('nameInput').value.trim();
   if(userName.length<2) return;
-  startTime=new Date(); cur=0; score=0; answers=[];
+  startTime = new Date();
+  attemptId = Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  cur=0; score=0; answers=[];
   document.getElementById('qTotal').textContent=Q.length;
   showScreen('screen-quiz');
   render();
+  // ① 시작 즉시 Sheet에 한 줄 생성
+  sendToSheet(buildPayload('started'));
 }
 
 function render() {
@@ -200,6 +241,10 @@ function answer(userAns) {
 
 function nextQ() {
   cur++;
+  // ② Q3 완료 후 중간 저장
+  if(cur===3) sendToSheet(buildPayload('in_progress'));
+  // ③ Q8 완료 후 중간 저장
+  if(cur===8) sendToSheet(buildPayload('in_progress'));
   if(cur>=Q.length) showResult(); else render();
 }
 
@@ -215,46 +260,33 @@ function showResult() {
   document.getElementById('retryBtn').style.display = pct===1 ? 'none' : 'block';
 
   let title,msg;
-  const resultScreen = document.getElementById('screen-result');
   if(pct===1){
     title="YOU'RE READY! 🎉";
     msg=`Perfect score — ${score}/${total}. You know your stuff. <strong>We'll see you in the session!</strong><br><small style="opacity:.6;font-size:12px;">Your result has been sent to Jongyeop Seon.</small>`;
-    resultScreen.style.background='linear-gradient(160deg,#1a3a2a 0%,#0d1f15 100%)';
-    document.querySelector('.score-num').style.color='#3dd68c';
   } else if(pct>=.8){
     title="SO CLOSE";
     msg=`${score}/${total} — Almost there! A few things slipped through. <strong>Give it another try and aim for 100.</strong>`;
-    resultScreen.style.background='';
   } else if(pct>=.6){
     title="NOT QUITE YET";
     msg=`${score}/${total} — You've got the basics, but there's more to cover. <strong>Review the feedback and try again.</strong>`;
-    resultScreen.style.background='';
   } else {
     title="TRY AGAIN";
     msg=`${score}/${total} — That's okay — this is what the quiz is for. <strong>Read each explanation carefully and go again.</strong>`;
-    resultScreen.style.background='';
   }
 
   document.getElementById('resultTitle').textContent=title;
   document.getElementById('resultMsg').innerHTML=msg;
 
   const wrongCats=[...new Set(answers.filter(a=>!a.ok).map(a=>a.cat))];
-  const payload={
-    timestamp:new Date().toISOString(),
-    name:userName,
-    score,
-    total,
-    pct:Math.round(pct*100),
-    result:title,
-    elapsed_sec:elapsed,
-    wrong_categories:wrongCats.join(', '),
-    per_question:answers.map(a=>a.ok?1:0).join(',')
-  };
+
+  // ④ 완료 시 최종 저장
+  const finalPayload = buildPayload('completed');
+  finalPayload.result = title;
+  sendToSheet(finalPayload);
 
   if(SHEET_URL && SHEET_URL!=="YOUR_APPS_SCRIPT_URL_HERE") {
-    fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
-      .then(()=>{ document.getElementById('savingBadge').className='saving-badge done'; document.getElementById('savingText').textContent='Result saved ✓'; })
-      .catch(()=>{ document.getElementById('savingBadge').className='saving-badge fail'; document.getElementById('savingText').textContent='Could not save — show organiser'; });
+    document.getElementById('savingBadge').className='saving-badge done';
+    document.getElementById('savingText').textContent='Result saved ✓';
   } else {
     document.getElementById('savingBadge').style.display='none';
   }
